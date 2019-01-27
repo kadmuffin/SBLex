@@ -95,7 +95,7 @@ SBLex is compatible with Python2 & Python3.
 
 Licence
 -------
-SBLex is under the `MIT License <https://github.com/kadmuffin/SBLex/LICENSE>`_.
+SBLex is under the `MIT License <https://github.com/kadmuffin/SBLex/blob/master/LICENSE>`_.
 
 Authors
 -------
