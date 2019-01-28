@@ -736,6 +736,7 @@ class rule(object):
 
                     token_instance.set_skips_rules(self._get_skips_rules())
 
+                    return token_instance
         else:
 
             # OBSOLETE LINE COUNTING SYSTEM
