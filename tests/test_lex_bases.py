@@ -6,6 +6,21 @@ def example_function():
     """
 
 
+def example_function_return(text):
+    """Only will be used for testing the function argument in the rule functions.
+    """
+    return "noise"
+
+
+def test_convert_dependencies():
+    """Checks that the dict created by _convert_to_token_dependent_format() is valid.
+    """
+    converted_dependencies = lex_bases._convert_to_token_dependent_format(
+        {"rules": []}
+    )[1]
+    assert "ignore_rules" in converted_dependencies.keys()
+
+
 def test_token_constructor():
     """"Checks if the token constructor works as expected.
     """
@@ -47,7 +62,7 @@ def test_token_constructor():
         points += 1
 
     assert points == 11
-    
+
 
 def test_rule_constructor():
     """Checks if the rule constructor works as expected.
@@ -115,6 +130,8 @@ def test_rule_clean_text():
 def test_rule_compile_token():
     """Tries to compile a token to check if all works as expected.
     """
+
+    # Normal Token
     test_rule = lex_bases.rule("TEST", r"test")
 
     new_token = test_rule._compile_text_to_token(
@@ -130,7 +147,72 @@ def test_rule_compile_token():
     expected_token.set_col_where_finded(0)
     expected_token.set_deprecated_line_pos(0)
 
-    assert new_token._complete_equal(expected_token)
+    points = 0
+
+    if new_token._complete_equal(expected_token):
+        points += 1
+
+    # Skip token.
+    test_rule = lex_bases.rule("SKIPPED", r"test")
+
+    new_token = test_rule._compile_text_to_token(
+        "test",
+        line_where_finded=0,
+        col_where_finded=0,
+        obsolete_line_count=0,
+        obsolete_line_count_function=example_function,
+        truly_original_value="noise test noise",
+    )
+
+    expected_token = lex_bases.token("SKIPPED", "test")
+    expected_token.set_line_where_finded(0)
+    expected_token.set_col_where_finded(0)
+    expected_token.set_deprecated_line_pos(0)
+
+    if new_token._complete_equal(expected_token):
+        points += 1
+
+    # Normal token with function->no return.
+    test_rule = lex_bases.rule("TEST", r"test", function=example_function)
+
+    new_token = test_rule._compile_text_to_token(
+        "test",
+        line_where_finded=0,
+        col_where_finded=0,
+        obsolete_line_count=0,
+        obsolete_line_count_function=example_function,
+        truly_original_value="noise test noise",
+    )
+
+    expected_token = lex_bases.token("TEST", "test")
+    expected_token.set_line_where_finded(0)
+    expected_token.set_col_where_finded(0)
+    expected_token.set_deprecated_line_pos(0)
+
+    if new_token._complete_equal(expected_token):
+        points += 1
+
+    # Normal token with function->return.
+    test_rule = lex_bases.rule("TEST", r"test", function=example_function_return)
+
+    new_token = test_rule._compile_text_to_token(
+        "test",
+        line_where_finded=0,
+        col_where_finded=0,
+        obsolete_line_count=0,
+        obsolete_line_count_function=example_function,
+        truly_original_value="noise test noise",
+    )
+
+    expected_token = lex_bases.token("TEST", "test")
+    expected_token.set_line_where_finded(0)
+    expected_token.set_col_where_finded(0)
+    expected_token.set_deprecated_line_pos(0)
+
+    if new_token._complete_equal(expected_token):
+        points += 1
+
+    assert points == 3
 
 
 def test_match_rule():
