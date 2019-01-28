@@ -1,6 +1,7 @@
 import pytest
 import re
-from SBLex import lex, lex_bases
+from SBLex import lex, lex_bases, lex_premades
+
 
 def example_function():
     """Only will be used for testing the function argument in lex.add() and lex.skip()
@@ -72,17 +73,16 @@ def test_add():
     lexer_2 = lex.lex()
 
     # Try to lex: My name is name
-    lexer_2.add(
-        "His name",
-        r'My name is ([a-zA-Z]+)',
-        capturing_group=1
-    )
+    lexer_2.add("His name", r"My name is ([a-zA-Z]+)", capturing_group=1)
 
     returned_tokens = lexer_2.evaluate("My name is KadMuffin")
 
     expected_token_2 = lex_bases.token("His name", "KadMuffin")
 
-    assert lexer.rules[1]._complete_equal(expected_rule) and returned_tokens[0] == expected_token_2
+    assert (
+        lexer.rules[1]._complete_equal(expected_rule)
+        and returned_tokens[0] == expected_token_2
+    )
 
 
 def test_skip():
@@ -114,17 +114,16 @@ def test_skip():
 
 def test_load_premade():
     working = True
-    
+
     lexer = lex.lex()
     lexer.load_premade(lex_bases.rule("TEST", r"test"))
-    
+
     if lexer.rules[1] != lex_bases.rule("TEST", r"test"):
         working = False
-    
+
     lexer.load_premade(
         [lex_bases.rule("TEST_2", r"test_2"), lex_bases.rule("TEST_3", r"test_3")]
     )
-
 
     if lexer.rules[2] != lex_bases.rule("TEST_2", r"test_2") or lexer.rules[
         3
@@ -140,10 +139,21 @@ def test_ignore():
     # Create lex instance
     lexer = lex.lex()
 
-    # Add a ignore rule
-    lexer._ignore(r"test", force_usage=True)
+    # Add a rule for lex test
+    lexer.add("TEST", r"test")
 
-    assert lexer.ignore_r[0]._complete_equal(lex_bases.rule("IGNORED", r"test"))
+    # Add a ignore rule
+    lexer._ignore(r"noise", force_usage=True)
+
+    token_stream = lexer.evaluate("tenoisestt")
+
+    expected_token_stream = [
+        lex_bases.token("TEST", "test"),
+        lex_bases.token("TEST", "test"),
+        lex_bases.token("TEST", "test"),
+    ]
+
+    assert token_stream == expected_token_stream
 
 
 def test_lex_build():
@@ -169,6 +179,7 @@ def test_lex_build():
 
     assert lexer._rules[1]._get_skips_rules()[0]._complete_equal(expected_rule)
 
+
 def test_load_text():
     """Test if the function load_text works
     """
@@ -184,6 +195,73 @@ def test_lexing_error():
     """
     with pytest.raises(SyntaxError):
         lex._lexer(None, None)._load_text("TEST")._throw_lexing_error()
+
+
+def test_lexing_error_evaluate_1():
+    """Check if the lexing error works as expected, in this case in evaluate().
+    """
+    with pytest.raises(SyntaxError):
+        lex._lexer([lex_premades.float], [])._load_text("TEST").evaluate()
+
+
+def test_lexing_error_evaluate_2():
+    """Check if the lexing error works as expected, in this case evaluate() but using str as custom error
+    """
+    with pytest.raises(SyntaxError):
+        lex._lexer([lex_premades.float], [], "[[LINE]] [[TEXT]]")._load_text(
+            "TEST"
+        ).evaluate()
+
+
+def test_lexing_error_evaluate_3():
+    """Check if the lexing error works as expected, in this case evaluate() but using a function as custom error
+    """
+    with pytest.raises(SyntaxError):
+        lex._lexer([lex_premades.float], [], example_function())._load_text(
+            "TEST"
+        ).evaluate()
+
+
+def test_get_original_text():
+    """Checks if the value returned  by _lexer.get_original_text() is valid.
+    """
+
+    assert lex._lexer(None, None)._load_text("test").get_original_text() == "test"
+
+
+def test_dependencies():
+    """Check if the property dependencies works on evaluate.
+    """
+    lexer = lex.lex()
+    lexer.add("TEST", r"test", dependencies=[lex_bases.rule("TEST_2", r"text")])
+    lexer.skip(r"\s+")
+
+    token_stream = lexer.evaluate("test text")
+
+    points = 0
+
+    if token_stream[0][0] == lex_bases.token("TEST", r"test") and token_stream[0][
+        1
+    ] == lex_bases.token("TEST_2", r"text"):
+        points += 1
+
+    lexer = lex.lex()
+
+    lexer.skip("TEST", r"test", {"rules": [lex_bases.rule("TEST_2", r"text")]})
+
+    lexer.load_premade([lex_premades.var_declaration, lex_premades.comment], False)
+
+    lexer.load_premade(lex_premades.var_declaration)
+
+
+def test_deprecated_line_plus():
+    """Test the function _lexer._plus_deprecated_line_count()
+    """
+    lexer = lex._lexer(None, None)
+
+    lexer._plus_deprecated_line_count()
+
+    assert lexer._deprecated_line_count == 0
 
 
 def test_reset_lexer():
