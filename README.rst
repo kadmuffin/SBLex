@@ -9,6 +9,10 @@ SBLex
    :target: https://travis-ci.org/kadmuffin/SBLex
    :alt: Latest Travis CI build status
 
+.. image:: https://codecov.io/gh/kadmuffin/SBLex/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/kadmuffin/SBLex/branch/master
+   :alt: Latest CodeCov status
+
 A simple library for tokenizing text with additional functionalities.
 
 Overview
