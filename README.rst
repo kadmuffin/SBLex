@@ -14,6 +14,7 @@ SBLex
    :alt: Latest CodeCov status
 
 A simple library for tokenizing text with additional functionalities. (NOT MAINTAINED ANYMORE)
+
 Overview
 --------
 
