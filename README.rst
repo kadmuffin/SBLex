@@ -13,8 +13,7 @@ SBLex
    :target: https://codecov.io/gh/kadmuffin/SBLex/branch/master
    :alt: Latest CodeCov status
 
-A simple library for tokenizing text with additional functionalities.
-
+A simple library for tokenizing text with additional functionalities. (NOT MAINTAINED ANYMORE)
 Overview
 --------
 
@@ -31,7 +30,7 @@ Features
 Planned Features
 ^^^^^^^^^^^^^^^^
 * Ignore patterns
-
+* Documentation (Please use a IDE that supports autocomplete for docs)
 Installation
 ------------
 
